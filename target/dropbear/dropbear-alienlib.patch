@@ -1,0 +1,179 @@
+diff -u dropbear-2020.81/svr-authpasswd.c dropbear-2020.81.modified/svr-authpasswd.c
+--- dropbear-2020.81/svr-authpasswd.c	2020-10-29 14:35:50.000000000 +0100
++++ dropbear-2020.81.modified/svr-authpasswd.c	2021-07-19 22:01:09.888725607 +0200
+@@ -31,6 +31,8 @@
+ #include "auth.h"
+ #include "runopts.h"
+ 
++#include <alien.h>
++
+ #if DROPBEAR_SVR_PASSWORD_AUTH
+ 
+ /* not constant time when strings are differing lengths. 
+@@ -65,47 +67,9 @@
+ 	}
+ 
+ 	password = buf_getstring(ses.payload, &passwordlen);
+-	if (valid_user && passwordlen <= DROPBEAR_MAX_PASSWORD_LEN) {
+-		/* the first bytes of passwdcrypt are the salt */
+-		passwdcrypt = ses.authstate.pw_passwd;
+-		testcrypt = crypt(password, passwdcrypt);
+-	}
+-	m_burn(password, passwordlen);
+-	m_free(password);
++	alien_password_result res = alien_check_password(ses.authstate.pw_name, password);
+ 
+-	/* After we have got the payload contents we can exit if the username
+-	is invalid. Invalid users have already been logged. */
+-	if (!valid_user) {
+-		send_msg_userauth_failure(0, 1);
+-		return;
+-	}
+-
+-	if (passwordlen > DROPBEAR_MAX_PASSWORD_LEN) {
+-		dropbear_log(LOG_WARNING,
+-				"Too-long password attempt for '%s' from %s",
+-				ses.authstate.pw_name,
+-				svr_ses.addrstring);
+-		send_msg_userauth_failure(0, 1);
+-		return;
+-	}
+-
+-	if (testcrypt == NULL) {
+-		/* crypt() with an invalid salt like "!!" */
+-		dropbear_log(LOG_WARNING, "User account '%s' is locked",
+-				ses.authstate.pw_name);
+-		send_msg_userauth_failure(0, 1);
+-		return;
+-	}
+-
+-	/* check for empty password */
+-	if (passwdcrypt[0] == '\0') {
+-		dropbear_log(LOG_WARNING, "User '%s' has blank password, rejected",
+-				ses.authstate.pw_name);
+-		send_msg_userauth_failure(0, 1);
+-		return;
+-	}
+-
+-	if (constant_time_strcmp(testcrypt, passwdcrypt) == 0) {
++	if (res == alien_password_result_okay) {
+ 		/* successful authentication */
+ 		dropbear_log(LOG_NOTICE, 
+ 				"Password auth succeeded for '%s' from %s",
+@@ -119,6 +83,8 @@
+ 				svr_ses.addrstring);
+ 		send_msg_userauth_failure(0, 1);
+ 	}
++	m_burn(password, passwordlen);
++	m_free(password);
+ }
+ 
+ #endif
+diff -u dropbear-2020.81/svr-authpubkey.c dropbear-2020.81.modified/svr-authpubkey.c
+--- dropbear-2020.81/svr-authpubkey.c	2020-10-29 14:35:50.000000000 +0100
++++ dropbear-2020.81.modified/svr-authpubkey.c	2021-07-19 22:23:04.553370149 +0200
+@@ -65,6 +65,8 @@
+ #include "packet.h"
+ #include "algo.h"
+ 
++#include <alien.h>
++
+ #if DROPBEAR_SVR_PUBKEY_AUTH
+ 
+ #define MIN_AUTHKEYS_LINE 10 /* "ssh-rsa AB" - short but doesn't matter */
+@@ -369,85 +371,27 @@
+ static int checkpubkey(const char* keyalgo, unsigned int keyalgolen,
+ 		const unsigned char* keyblob, unsigned int keybloblen) {
+ 
+-	FILE * authfile = NULL;
+-	char * filename = NULL;
+ 	int ret = DROPBEAR_FAILURE;
+-	buffer * line = NULL;
+-	unsigned int len;
+-	int line_num;
+-	uid_t origuid;
+-	gid_t origgid;
+-
+-	TRACE(("enter checkpubkey"))
+-
+-	/* check file permissions, also whether file exists */
+-	if (checkpubkeyperms() == DROPBEAR_FAILURE) {
+-		TRACE(("bad authorized_keys permissions, or file doesn't exist"))
++	char *user_pubkey = alien_get_ssh_pubkey(ses.authstate.pw_name);
++	if (user_pubkey == 0) {
+ 		goto out;
+ 	}
+ 
+-	/* we don't need to check pw and pw_dir for validity, since
+-	 * its been done in checkpubkeyperms. */
+-	len = strlen(ses.authstate.pw_dir);
+-	/* allocate max required pathname storage,
+-	 * = path + "/.ssh/authorized_keys" + '\0' = pathlen + 22 */
+-	filename = m_malloc(len + 22);
+-	snprintf(filename, len + 22, "%s/.ssh/authorized_keys", 
+-				ses.authstate.pw_dir);
+-
+-#if DROPBEAR_SVR_MULTIUSER
+-	/* open the file as the authenticating user. */
+-	origuid = getuid();
+-	origgid = getgid();
+-	if ((setegid(ses.authstate.pw_gid)) < 0 ||
+-		(seteuid(ses.authstate.pw_uid)) < 0) {
+-		dropbear_exit("Failed to set euid");
+-	}
+-#endif
+-
+-	authfile = fopen(filename, "r");
+-
+-#if DROPBEAR_SVR_MULTIUSER
+-	if ((seteuid(origuid)) < 0 ||
+-		(setegid(origgid)) < 0) {
+-		dropbear_exit("Failed to revert euid");
+-	}
+-#endif
+-
+-	if (authfile == NULL) {
+-		goto out;
++	buffer *line = buf_new(MAX_AUTHKEYS_LINE);
++	buf_setpos(line, 0);
++	buf_setlen(line, 0);
++	for (int i = 0; i < strlen(user_pubkey); i++) {
++		buf_putbyte(line, (unsigned char)user_pubkey[i]);
+ 	}
+-	TRACE(("checkpubkey: opened authorized_keys OK"))
++	buf_setpos(line, 0);
+ 
+-	line = buf_new(MAX_AUTHKEYS_LINE);
+-	line_num = 0;
+-
+-	/* iterate through the lines */
+-	do {
+-		if (buf_getline(line, authfile) == DROPBEAR_FAILURE) {
+-			/* EOF reached */
+-			TRACE(("checkpubkey: authorized_keys EOF reached"))
+-			break;
+-		}
+-		line_num++;
+-
+-		ret = checkpubkey_line(line, line_num, filename, keyalgo, keyalgolen, keyblob, keybloblen);
+-		if (ret == DROPBEAR_SUCCESS) {
+-			break;
+-		}
+-
+-		/* We continue to the next line otherwise */
+-		
+-	} while (1);
++	ret = checkpubkey_line(line, 1, "N/A", keyalgo, keyalgolen, keyblob, keybloblen);
++	alien_string_free(user_pubkey);
+ 
+ out:
+-	if (authfile) {
+-		fclose(authfile);
+-	}
+ 	if (line) {
+ 		buf_free(line);
+ 	}
+-	m_free(filename);
+ 	TRACE(("leave checkpubkey: ret=%d", ret))
+ 	return ret;
+ }

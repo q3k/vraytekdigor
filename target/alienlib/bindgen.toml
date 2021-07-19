@@ -1,0 +1,12 @@
+language = "C"
+include_guard = "__alien_h__"
+
+[export]
+prefix = "alien_"
+
+[export.rename]
+"PasswordResult" = "password_result"
+
+[enum]
+rename_variants = "SnakeCase"
+prefix_with_name = true

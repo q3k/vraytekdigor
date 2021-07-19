@@ -1,0 +1,79 @@
+syntax = "proto3";
+package tarmanip.proto.manipulate;
+option go_package = "github.com/q3k/vraytekdigor/tarmanip/proto/manipulate";
+
+// The script is the top-level configuration file for tarmanip. It contains a
+// series of changes to apply to a tarball containing the root filesystem of an
+// embedded device.
+//
+// Each Change is applied sequentially, and all changes must be applied
+// succesfully for the script to succeed.
+message Script {
+    // List of changes to be applied sequentially.
+    repeated Change change = 1;
+}
+
+// Change performs some mutation of the rootfs tarball.
+message Change {
+    oneof kind {
+        Remove remove = 1;
+        Write write = 2;
+        BinReplace binreplace = 3;
+        Create create = 4;
+        JSONPatch jsonpatch = 5;
+    }
+}
+
+// Remove deletes a given file or directory.
+message Remove {
+    // File or directory to remove, absolute (eg. /etc/passwd).
+    string path = 1;
+    // Whether to expect the path to be a directory whose sub-paths should also
+    // be removed. An error is thrown if this is true and the path is not a
+    // directory.
+    bool recursive = 2;
+}
+
+// Write data to an existing file. File must exist, if it doesn't, first use
+// Create.
+message Write {
+    // File or directory to remove, absolute (eg. /etc/passwd).
+    string path = 1;
+    // Path of a file in the host filesystem to read and replace the file at
+    // path with.
+    string source = 2;
+}
+
+// Replace a string in a file (text or binary), keeping the original file
+// length.
+message BinReplace {
+    // File or directory to remove, absolute (eg. /usr/bin/ls).
+    string path = 1;
+    // Sequence to replace in the given file (if multiple occurences are found,
+    // all will be acted on).
+    string from = 2;
+    // Data to replace the above sequence with, must not be longer than it.
+    string to = 3;
+    // If 'to' is shorter than 'from', it will be padded with either binary
+    // zeroes or the character given below. If set, must be one byte long.
+    string pad = 4;
+}
+
+// Create a file at a given path. Currently always a file, and always owned by
+// root.
+message Create {
+    // File or directory to remove, absolute (eg. /etc/release).
+    string path = 1;
+    // Mode at which the file will be created.
+    int32 mode = 2;
+}
+
+// Apply a JSON patch (RFC 6902) to a given file. Useful to manipulate large
+// JSON configs within the rootfs tarball.
+message JSONPatch {
+    // File or directory to manipulate, absolute (eg. /etc/config/settings.json).
+    string path = 1;
+    // JSON-marshalled JSON patch to apply, eg.:
+    // "[{\"op\": \"add\", \"path\": \"/port\", \"data\": 1337}}]"
+    string source = 2;
+}
