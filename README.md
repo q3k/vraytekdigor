@@ -110,3 +110,28 @@ Considering the above, **no binary builds of the custom firmware will ever be
 provided**. You must build everything yourself, and do your own legal research
 on whether whatever you're doing is even legal.
 
+# Vigor 167 - General Software/Hardware information
+
+The modem runs on a coNet EN751627 SOC (2 cores / 4 threads), has a bit over
+100M of RAM available to Linux and 128MB of flash (split into a set of
+primary/secondary partitions).
+
+**Speculation below:**
+
+DrayOS 5 is based on Linux 3.18.21. It seems to have been bult from a buildroot
+BSP that might have also been used in previous DrayOS builds? Hard to tell.
+
+The firmware contains a lot of references to a 'TC3162' but that seems to be a
+red herring, what looks like a standalone ADSL SoC from Trendchip that now has
+become a standardized userland interface for some class of DSL home gateways?
+It seems to pop up across various vendors of different classes of DSL modems
+across years of random public projects.  People have been writing
+[parsers](https://github.com/zoka/modstat/blob/master/modstat.py) for `cat
+/proc/tc3162/adsl_stats` for a while now. A whole bunch of kernel modules (to
+which there are no sources...) interact with and implement this mysterious
+tc3162 world, including what seems to be the main ethernet/switch driver
+(`eth.ko`). The switch chip / MAC itself might be a MT7530.
+
+More research would have to be done into the actual driver/firmware stack
+involved to make an educated opinion on whether something like OpenWRT could be
+ported to this device. Having a reliable root shell helps :).
