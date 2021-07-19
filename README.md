@@ -35,7 +35,8 @@ You will need [nix or NixOS](https://nixos.org/download.html).
 
     $ # Build everything. This will take a bit on first run, as a bunch of
     $ # toolchains for MIPS must be built...
-    $ nix-build
+    $ export NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1
+    $ nix-build -A cfw
     /nix/store/v7ihha3j4j2swz3ildaylz9vqaqrl78r-vraytek-custom-518f426f
     $ # Note: your hash will differ, as it's based on the Git revision of this
     $ # repository at build time.
