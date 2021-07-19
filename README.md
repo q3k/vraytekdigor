@@ -112,7 +112,7 @@ on whether whatever you're doing is even legal.
 
 # Vigor 167 - General Software/Hardware information
 
-The modem runs on a coNet EN751627 SOC (2 cores / 4 threads), has a bit over
+The modem runs on a EcoNet EN751627 SOC (2 cores / 4 threads), has a bit over
 100M of RAM available to Linux and 128MB of flash (split into a set of
 primary/secondary partitions).
 
