@@ -10,15 +10,15 @@ All tarmanip behaviour is defined in a script. The script is a [prototext](https
 
 For example:
 
-   cat > passwd-modified.txt <<EOF
-   root:x:0:0:System administrator:/root:/bin/bash
-   EOF
-   cat > script.pb.text << EOF
-   change { write {
-     path: "/etc/passwd"
-     source: "./passwd-modified.txt"
-   } }
-   EOF
+    cat > passwd-modified.txt <<EOF
+    root:x:0:0:System administrator:/root:/bin/bash
+    EOF
+    cat > script.pb.text << EOF
+    change { write {
+      path: "/etc/passwd"
+      source: "./passwd-modified.txt"
+    } }
+    EOF
 
 For more information about supported changes, see [proto/manipulate.proto](proto/manipulate.proto). The script is very low-level, and it it recommended you use your favourite programming language to generate it from some higher-level description of intent.
 
