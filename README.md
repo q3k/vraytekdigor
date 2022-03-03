@@ -18,7 +18,7 @@ Before we go any further, a few things must be stated:
 
 # Features
 
-The custom firmware is based on firmware version 5.0 of the Draytek Vigor 167
+The custom firmware is based on firmware version 5.0.1 of the Draytek Vigor 167
 VDSL modem, with the following modifications:
 
  - A modern Dropbear server (2020.81) running /bin/sh instead of a limited

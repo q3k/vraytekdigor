@@ -83,7 +83,7 @@ in
           {
             op = "replace";
             path = "/fw_ver";
-            value = "5.0 VraytekDigor ${cfwlib.gitHash}";
+            value = "5.0.1 VraytekDigor ${cfwlib.gitHash}";
           }
         ])}"
       } }
