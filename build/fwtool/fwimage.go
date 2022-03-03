@@ -129,10 +129,10 @@ func parseFWFile(path string) (*fwFile, error) {
 }
 
 func (f *fwFile) write(path string) error {
-	if want, got := 0x0021e1b5, len(f.kernel); got != want {
+	if want, got := 0x0021ccb2, len(f.kernel); got != want {
 		return fmt.Errorf("kernel blob wrong size, got %x bytes, wanted %x", got, want)
 	}
-	if want, got := 0x00ed0000, len(f.squash); got > want {
+	if want, got := 0x012a78f3, len(f.squash); got > want {
 		return fmt.Errorf("squashfs blob too large, got %x bytes, max %x", got, want)
 	}
 

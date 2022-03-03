@@ -1,7 +1,10 @@
 let
   # Make a nixpkgs configured to cross-compile for mips, and with our custom
   # packages overlaid.
-  nixpkgs = import <nixpkgs> {
+  nixpkgs = import (builtins.fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/1f1eefec2290138f21958df522de23104a445df7.tar.gz";
+    sha256 = "0k5k66fqv6dgq75jyvzxgssc6i0ych4rdqf55pcwq3paz10p9kai";
+  }) {
     crossSystem = {
       libc = "musl";
       config = "mips-unknown-linux-musl";
@@ -55,9 +58,9 @@ in
     modelSlug = "v167";
     gitRevision = cfwlib.gitHash;
     originalZip = pkgs.fetchurl {
-      name = "vigor167-5.0";
-      url = "http://draytek.com/download_de/Firmwares-Modem/Vigor160-Serie/Vigor167/Vigor167_v5.0_STD.zip";
-      sha256 = "1321s42v7dm10r2hzxnqkpn8cknmkv8slkg5gcbd4fk3zfb6f772";
+      name = "vigor167-5.0.1";
+      url = "http://draytek.com/download_de/Firmwares-Modem/Vigor160-Serie/Vigor167/Vigor167_v5.0.1_STD.zip";
+      sha256 = "1aamb07s6103fcq3v5bvph1av1mkx2wy153czalc7qbcmsknzg1f";
     };
   
     # tarmanip script describing the actual firmware modification. See

@@ -18,6 +18,6 @@ buildGoModule {
     go generate
   '';
 
-  vendorSha256 = "1p5zzx7sb6hyrx8xr5wi67jb7wh7am7ah67k073hnq43ha03dn1l";
-  runVend = true;
+  vendorSha256 = "0snc9dqfr95535zds9dim6gsafxbl5vh0j7vlcr55lqjwmhja9f8";
+  proxyVendor = true;
 }

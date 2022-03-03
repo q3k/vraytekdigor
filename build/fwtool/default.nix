@@ -8,6 +8,6 @@ buildGoModule {
 
   src = lib.cleanSource ./.;
 
-  vendorSha256 = "0vkr1wn02li57whq1c2k28m0vn42gjckprvchb2sqqk2gsnii8x9";
-  runVend = true;
+  vendorSha256 = "1b6sa6q30kid89mc3f06ncnl0735h7ws5dzcknq18zw8z68pqskc";
+  proxyVendor = true;
 }

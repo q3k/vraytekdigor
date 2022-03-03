@@ -13,7 +13,7 @@ rustPlatform.buildRustPackage rec {
 
   src = lib.cleanSource ./.;
 
-  cargoSha256 = "0sv7jdia6kknz66z4bga129apm8gsbn9mps4nppj34g2n4295q8n";
+  cargoSha256 = "1brsd0cn8h5cvwlgpvs8ifp9yk94d7md1rma4ldq3cwj4ck9jyy6";
 
   nativeBuildInputs = [ buildPackages.rust-cbindgen ];
 
