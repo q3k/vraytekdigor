@@ -2,8 +2,8 @@ let
   # Make a nixpkgs configured to cross-compile for mips, and with our custom
   # packages overlaid.
   nixpkgs = import (builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/1f1eefec2290138f21958df522de23104a445df7.tar.gz";
-    sha256 = "0k5k66fqv6dgq75jyvzxgssc6i0ych4rdqf55pcwq3paz10p9kai";
+    url = "https://github.com/NixOS/nixpkgs/archive/19081514c247fbe95d0cd9094e530cafd43dbe7f.tar.gz";
+    sha256 = "sha256:1kaghqzfp7f6pll96l5dxz44j3qrqx10w1vqml6bziwr1gywngfl";
   }) {
     crossSystem = {
       libc = "musl";
