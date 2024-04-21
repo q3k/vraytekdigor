@@ -103,11 +103,12 @@
   # Get 8-character shorthash of the commit checked out in this repository.
   # IFD, very bad, not good.
   gitHash = let
+    path = builtins.path { path = ./.git; name = "git"; };
     ifd = runCommand "gitHashIFD" {
       nativeBuildInputs = [ git ];
     } ''
-        cd ${builtins.path { path = ./.git; name = "git"; }}
-        short=$(git rev-parse --short=8 HEAD)
+        cd ${path}
+        short=$(git -c "safe.directory=${path}" rev-parse --short=8 HEAD)
         mkdir -p $out
         cat >$out/default.nix <<EOF
         {
