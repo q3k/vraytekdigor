@@ -59,7 +59,10 @@ in
     gitRevision = cfwlib.gitHash;
     originalZip = pkgs.fetchurl {
       name = "vigor167-5.0.1";
-      url = "http://draytek.com/download_de/Firmwares-Modem/Vigor160-Serie/Vigor167/Vigor167_v5.0.1_STD.zip";
+      # Original URL, taken down.
+      #url = "http://draytek.com/download_de/Firmwares-Modem/Vigor160-Serie/Vigor167/Vigor167_v5.0.1_STD.zip";
+      # My mirror.
+      url = "https://object.ceph-eu.hswaw.net/q3k-personal/2ebc6fa7ae6ce1c3a8fa6c94e0b9e8b386ad02bc7b953d30730304a30f5855a9.zip";
       sha256 = "1aamb07s6103fcq3v5bvph1av1mkx2wy153czalc7qbcmsknzg1f";
     };
   
